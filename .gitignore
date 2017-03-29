@@ -1,0 +1,6 @@
+!.gitignore
+!LICENSE
+!makeCDNListingFiles.py
+!makeCDN.sh
+!README.md  
+*
