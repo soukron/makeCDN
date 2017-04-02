@@ -22,15 +22,31 @@ Did you notice my warnings?
 * Move its content to your source directory, __/var/www/html/cdn__ or edit the 
   script to use a different directory
 * Subscribe your CDN server to Red Hat with a valid entitlement
-* Enable your desired repos
+* Enable your desired repos using subscription-manager
 * Make sure that **hostname -f** is resolved by DNS or edit the script to use a
   different hostname
 
-## Usage
+## Basic Usage
 * Modify **repos.txt** file to set which repositories should be synchronized and
   exported as CDN (previously enabled with your valid entitlement)
-* Run this script and let it finish
+* Run this script and let it finish:
+  ```
+  ./makeCDN.sh
+  ```
 * Set your Satellite to use your server as CDN: __http://yourserver.yourdomain.tld/cdn__
+
+## Advanced Usage
+* If you want to create different versions as time goes by, you can provide a 
+  name as first parameter:
+  ```
+  ./makeCDN.sh version1
+  ```
+
+* If you want to create a new version, using any existing version, as source to 
+  save time in download process, use a second parameter:
+  ```
+  ./makeCDN.sh version2 version1
+  ```
 
 ## Contact
 Reach me in [Twitter] or email in soukron _at_ gmbros.net
