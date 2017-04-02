@@ -1,26 +1,37 @@
 #!/bin/bash
 
-# Where cdn files reside
-cdnroot=/var/www/html/cdn
-# Where cdn files are served
-contentroot=/var/www/html
 # FQDN of server which serves cdn files
-fqdn=`hostname -f`
+fqdn=cdn.t440s.local
 
-# Create content root if doesn't exist
-[ ! -d $contentroot ] || mkdir -p $contentroot
+# Where this script is located
+SCRIPTDIR="$(dirname "$(readlink -f "$0")")"
+
+# Where cdn files are served (http://<fqdn>/<contentroot>)
+if [ -z ${1} ]; then
+  contentroot=/var/www/html
+else
+  contentroot=/var/www/html/$1
+fi
+
+# Where cdn files are located
+cdnroot=$contentroot/files
+
+# Create content root and cdn directories if don't exist
+for dir in $contentroot $cdnroot; do
+  [ -d $dir ] || mkdir -p $dir
+done
 
 # Delete .repo file if exists
 [ -f $contentroot/cdn.repo ] && rm -f $contentroot/cdn.repo
 
 # Loop over required repos to be synch'ed
 cd $cdnroot
-for repo in `cat repos.txt | grep -v ^#`; do
-  echo $repo
+for repo in `cat $SCRIPTDIR/repos.txt | grep -v ^#`; do
+  echo "Synchronizing $repo..."
 
   # Get URL for each repo and replace cdn.redhat.com and extract directory hierarchy
-  baseurl=`yum-config-manager $repo | grep baseurl | cut -d " " -f 3 | sed "s/cdn\.redhat\.com/$fqdn/" | sed 's/https/http/'`
-  basedir=`echo $baseurl | cut -d / -f 4- | rev | cut -d / -f 2- | rev`
+  baseurl=`yum-config-manager $repo | grep baseurl | cut -d " " -f 3 | sed "s/cdn\.redhat\.com/$fqdn\/$1/" | sed 's/https/http/'`
+  basedir=`echo $baseurl | cut -d / -f 5- | rev | cut -d / -f 2- | rev`
   dir=`echo $baseurl | rev | cut -d / -f 1 | rev`
 
   # Synchronize and generate local repo metadata
@@ -45,8 +56,10 @@ done
 
 # Clean up previous listing files and create new ones
 find $contentroot -iname listing -delete
-./makeCDNListingFiles.py -c $contentroot/content
+$SCRIPTDIR/makeCDNListingFiles.py -c $contentroot/content
 
-# Restore context and ownership
-restorecon -vRF $contentroot
-chown -R apache.apache $contentroot
+# Restore context and ownership in cdn root and content directories
+for dir in $contentroot $cdnroot; do
+  restorecon -RF $dir &> /dev/null
+  chown -R apache.apache $dir
+done
