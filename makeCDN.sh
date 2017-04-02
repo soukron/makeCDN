@@ -16,6 +16,12 @@ fi
 # Where cdn files are located
 cdnroot=$contentroot/files
 
+# Try to copy source if any and it exists 
+if [ ! -z ${2} ] && [ -d /var/www/html/${2} ]; then
+  [ -d $contentroot ] && rm -fr $contentroot
+  cp -al /var/www/html/${2} $contentroot
+fi
+
 # Create content root and cdn directories if don't exist
 for dir in $contentroot $cdnroot; do
   [ -d $dir ] || mkdir -p $dir
