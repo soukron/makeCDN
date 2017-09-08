@@ -5,7 +5,8 @@ function log() {
 }
 
 # FQDN of server which serves cdn files
-fqdn=cdn.t440s.local
+fqdn=$( hostname -f )
+#fqdn=cdn.t440s.local
 
 # Where this script is located
 SCRIPTDIR="$(dirname "$(readlink -f "$0")")"
