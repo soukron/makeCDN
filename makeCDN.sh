@@ -5,7 +5,8 @@ function log() {
 }
 
 # FQDN of server which serves cdn files
-fqdn=$(hostname -f)
+fqdn=$( hostname -f )
+#fqdn=cdn.t440s.local
 
 # Where this script is located
 SCRIPTDIR="$(dirname "$(readlink -f "$0")")"
@@ -50,7 +51,7 @@ for repo in `cat $SCRIPTDIR/repos.txt | grep -v ^#`; do
   dir=`echo $baseurl | rev | cut -d / -f 1 | rev`
 
   # Synchronize and generate local repo metadata
-  reposync -l --repoid=$repo --downloadcomps --download-metadata &> /dev/null
+  reposync -l --repoid=$repo --downloadcomps --download-metadata --delete &> /dev/null
   createrepo $repo/ -g comps.xml &> /dev/null
 
   # Create directory hierarchy and symlink repository
